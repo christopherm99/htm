@@ -1,0 +1,18 @@
+htm -- hyper text mux.
+
+A super simple HTTP multiplexer (ie. reverse proxy).
+
+Usage:
+
+  htm [-config <config_file>] [-port <port>]
+
+Configuration:
+
+Each non-empty, non-comment line should have a space separated list of items.
+The first item should be the target URL, and the subsequent items should be
+the hostnames you would like to proxy to this target URL. Note that
+subdomains of the hosts will be matched, in order of specificity (ie.
+a.b.c.com will match to a rule for b.c.com, even if a rule for c.com exists).
+Advanced features include protocol rewrites and subdirectory specification.
+See example.conf.
+
