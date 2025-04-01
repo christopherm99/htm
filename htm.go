@@ -94,9 +94,8 @@ func (config HTMProxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
   var proxyUrl url.URL
   found := false
 
-  // NOTE: 5 searches max! Beware of nested subdomains!
   hostname := r.Host
-  for i := 0; i < 5; {
+  for {
     if url, exists := config[hostname]; exists {
       found = true
       proxyUrl = url
