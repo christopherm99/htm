@@ -90,26 +90,31 @@ func newHTMProxy(filename string) (HTMProxy, error) {
 }
 
 func (config HTMProxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-  hostname := r.Host
 
   var proxyUrl url.URL
   found := false
 
-  for host, url := range config {
-    if strings.HasSuffix(hostname, host) {
+  // NOTE: 5 searches max! Beware of nested subdomains!
+  hostname := r.Host
+  for i := 0; i < 5; {
+    if url, exists := config[hostname]; exists {
       found = true
       proxyUrl = url
       break
     }
+
+    if dot := strings.Index(hostname, "."); dot != -1 {
+      hostname = hostname[dot+1:]
+    } else { break }
   }
 
   if !found {
     http.Error(w, "Bad Gateway", http.StatusBadGateway)
-    log.Printf("WARN: failed to proxy request: %s", hostname)
+    log.Printf("WARN: failed to proxy request: %s", r.Host)
     return
   }
 
-  log.Printf("INFO: proxying %s to %s", hostname, proxyUrl.String())
+  log.Printf("INFO: proxying %s to %s", r.Host, proxyUrl.String())
   proxy := httputil.NewSingleHostReverseProxy(&proxyUrl)
   proxy.ServeHTTP(w, r)
 }
